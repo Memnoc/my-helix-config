@@ -1,0 +1,59 @@
+[language-server.rust-analyzer]
+command = "rust-analyzer"
+
+[[language]]
+name = "rust"
+auto-format = true
+formatter = { command = "rustfmt" }
+language-servers = ["rust-analyzer"]
+indent = { tab-width = 4, unit = "    " }
+
+[language-server.typescript-language-server]
+command = "typescript-language-server"
+args = ["--stdio"]
+
+[language-server.eslint]
+command = "vscode-eslint-language-server"
+args = ["--stdio"]
+
+[[language]]
+name = "typescript"
+scope = "source.ts"
+injection-regex = "typescript"
+file-types = ["ts", "tsx"]
+shebangs = ["deno", "node"]
+comment-token = "//"
+language-servers = ["typescript-language-server", "eslint"]
+auto-format = true
+formatter = { command = "eslint", args = [
+  "--fix",
+  "--stdin",
+  "--stdin-filename",
+  "file.ts",
+] }
+indent = { tab-width = 2, unit = "  " }
+
+[[language]]
+name = "javascript"
+scope = "source.js"
+injection-regex = "javascript"
+file-types = ["js", "jsx"]
+shebangs = ["deno", "node"]
+comment-token = "//"
+language-servers = ["typescript-language-server", "eslint"]
+auto-format = true
+formatter = { command = "eslint", args = [
+  "--fix",
+  "--stdin",
+  "--stdin-filename",
+  "file.js",
+] }
+indent = { tab-width = 2, unit = "  " }
+
+# Key bindings
+[keys.normal]
+C-s = ":w"
+C-q = ":q"
+"ret" = ["open_below", "normal_mode"]
+[keys.normal.space]
+i = ":toggle lsp.display-inlay-hints"
