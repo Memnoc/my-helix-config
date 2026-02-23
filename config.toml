@@ -2,7 +2,16 @@
 # ══════════════════════════════════════════════
 # Main Configuration Settings
 # ══════════════════════════════════════════════
-theme = "horizon-dark"
+# theme = "horizon-dark"
+# theme = "bogster"
+theme = "rose_pine"
+# theme = "ashen"
+# theme = "tokyonight"
+# theme = "ayu-dark"
+# theme = "catppuccin-mocha"
+# theme = "dark-synthwave"
+# white one
+# theme = "earl-grey"
 
 [editor]
 cursorline = true
