@@ -1,16 +1,14 @@
-[language-server]
-deno = { command = "deno", args = ["lsp"] }
-emmet-ls = { command = "emmet-ls", args = ["--stdio"] }
+# ══════════════════════════════════════════════
+# Language Servers
+# ══════════════════════════════════════════════
 
+# ─ ESLint ─
 [language-server.eslint]
 command = "vscode-eslint-language-server"
 args = ["--stdio"]
 
 [language-server.eslint.config]
-codeActionsOnSave = { mode = "all", "source.fixAll.eslint" = true }
-format = { enable = true }
 nodePath = ""
-quiet = false
 rulesCustomizations = []
 run = "onType"
 validate = "on"
@@ -21,80 +19,432 @@ problems = { shortenToSingleLine = false }
 disableRuleComment = { enable = true, location = "separateLine" }
 showDocumentation = { enable = false }
 
+# ─ JSON ─
 [language-server.vscode-json-language-server.config]
 json = { validate = { enable = true }, format = { enable = true } }
 provideFormatter = true
 
+# ─ CSS/SCSS/Less ─
 [language-server.vscode-css-language-server.config]
 css = { validate = { enable = true } }
 scss = { validate = { enable = true } }
 less = { validate = { enable = true } }
 provideFormatter = true
 
-[language-server.typescript-language-server]
-command = "typescript-language-server"
+# ─ YAML ─
+[language-server.yaml-language-server.config]
+yaml.schemas.kubernetes = "*.yaml"
+yaml.schemas."http://json.schemastore.org/prettierrc" = "*prettierrc.{yml,yaml}"
+
+# ─ Rust Analyzer ─
+[language-server.rust-analyzer]
+command = "rust-analyzer"
+
+[language-server.rust-analyzer.config]
+check.command = "clippy"
+cargo.features = "all"
+inlayHints.bindingModeHints.enable = true
+inlayHints.closingBraceHints.minLines = 10
+inlayHints.closureReturnTypeHints.enable = "with_block"
+inlayHints.discriminantHints.enable = "fieldless"
+inlayHints.lifetimeElisionHints.enable = "skip_trivial"
+inlayHints.typeHints.hideClosureInitialization = false
+procMacro.enable = true
+diagnostics.experimental.enable = true
+
+# ─ Clangd (C/C++) ─
+[language-server.clangd]
+command = "clangd"
+args = [
+  "--background-index",
+  "--clang-tidy",
+  "--completion-style=detailed",
+  "--header-insertion=iwyu",
+  "--function-arg-placeholders",
+  "-j=4",
+]
+
+# ─ Emmet (HTML/JSX/TSX completions) ─
+[language-server.emmet-lsp]
+command = "emmet-language-server"
 args = ["--stdio"]
 
+# ─ Tailwind CSS ─
+[language-server.tailwindcss-ls]
+command = "tailwindcss-language-server"
+args = ["--stdio"]
 
+# ══════════════════════════════════════════════
+# Language Settings
+# ══════════════════════════════════════════════
+
+# ─ C ─
 [[language]]
-name = "typescript"
-scope = "source.ts"
-injection-regex = "typescript"
-file-types = ["ts", "tsx"]
-shebangs = ["deno", "node"]
-comment-token = "//"
-language-servers = ["typescript-language-server", "eslint"]
+name = "c"
 auto-format = true
-formatter = { command = "eslint", args = [
-  "--fix",
-  "--stdin",
-  "--stdin-filename",
-  "file.ts",
-] }
-indent = { tab-width = 2, unit = "  " }
+formatter = { command = "clang-format" }
+language-servers = ["clangd"]
 
+# ─ C++ ─
 [[language]]
-name = "tsx"
-language-servers = ["typescript-language-server", "eslint", "emmet-ls"]
-# formatter = { command = "prettier", args = [ "--parser", "typescript" ] }
-formatter = { command = "dprint", args = ["fmt", "--stdin", "tsx"] }
+name = "cpp"
 auto-format = true
+formatter = { command = "clang-format" }
+language-servers = ["clangd"]
 
+# ─ Rust ─
 [[language]]
-name = "javascript"
-language-servers = ["typescript-language-server", "eslint", "emmet-ls"]
-# formatter = { command = "prettier", args = [ "--parser", "typescript" ] }
-formatter = { command = "dprint", args = ["fmt", "--stdin", "javascript"] }
-auto-format = true
-
-[[language]]
-name = "jsx"
-language-servers = ["typescript-language-server", "eslint", "emmet-ls"]
-# formatter = { command = "prettier", args = [ "--parser", "typescript" ] }
-formatter = { command = "dprint", args = ["fmt", "--stdin", "jsx"] }
-auto-format = true
-
-[[language]]
-name = "json"
-# formatter = { command = "prettier", args = [ "--parser", "json" ] }
-formatter = { command = "dprint", args = ["fmt", "--stdin", "json"] }
-auto-format = true
-
-[[language]]
-name = "html"
-language-servers = ["vscode-html-language-server", "emmet-ls"]
-formatter = { command = 'prettier', args = ["--parser", "html"] }
-auto-format = true
-
-[[language]]
-name = "css"
-language-servers = ["vscode-css-language-server", "emmet-ls"]
-formatter = { command = 'prettier', args = ["--parser", "css"] }
-auto-format = true
-
-[language-server.rust-analyzer.config.check]
 name = "rust"
 auto-format = true
-formatter = { command = "rustfmt" }
 language-servers = ["rust-analyzer"]
-indent = { tab-width = 4, unit = "    " }
+
+[language.debugger]
+name = "lldb-dap"
+command = "lldb-dap"
+transport = "stdio"
+
+[[language.debugger.templates]]
+name = "binary"
+request = "launch"
+completion = [{ name = "binary", completion = "filename" }]
+args = { program = "{0}", runInTerminal = false }
+
+# ─ TypeScript ─
+[[language]]
+name = "typescript"
+auto-format = true
+formatter = { command = "prettier", args = ["--parser", "typescript", "--single-quote"] }
+language-servers = [
+  { name = "typescript-language-server", except-features = ["format"] },
+  { name = "eslint", except-features = ["format"] },
+]
+
+# ─ TSX ─
+[[language]]
+name = "tsx"
+auto-format = true
+formatter = { command = "prettier", args = ["--parser", "typescript", "--single-quote"] }
+language-servers = [
+  { name = "typescript-language-server", except-features = ["format"] },
+  { name = "eslint", except-features = ["format"] },
+  "emmet-lsp",
+  "tailwindcss-ls",
+]
+
+# ─ JavaScript ─
+[[language]]
+name = "javascript"
+auto-format = true
+formatter = { command = "prettier", args = ["--parser", "typescript", "--single-quote"] }
+language-servers = [
+  { name = "typescript-language-server", except-features = ["format"] },
+  { name = "eslint", except-features = ["format"] },
+]
+
+# ─ JSX ─
+[[language]]
+name = "jsx"
+auto-format = true
+formatter = { command = "prettier", args = ["--parser", "typescript", "--single-quote"] }
+language-servers = [
+  { name = "typescript-language-server", except-features = ["format"] },
+  { name = "eslint", except-features = ["format"] },
+  "emmet-lsp",
+  "tailwindcss-ls",
+]
+
+# ─ HTML ─
+[[language]]
+name = "html"
+auto-format = true
+formatter = { command = "prettier", args = ["--parser", "html"] }
+language-servers = ["vscode-html-language-server", "emmet-lsp", "tailwindcss-ls"]
+
+# ─ CSS ─
+[[language]]
+name = "css"
+auto-format = true
+formatter = { command = "prettier", args = ["--parser", "css"] }
+language-servers = ["vscode-css-language-server", "tailwindcss-ls"]
+
+# ─ SCSS ─
+[[language]]
+name = "scss"
+auto-format = true
+formatter = { command = "prettier", args = ["--parser", "scss"] }
+language-servers = ["vscode-css-language-server"]
+
+# ─ JSON ─
+[[language]]
+name = "json"
+auto-format = true
+formatter = { command = "prettier", args = ["--parser", "json"] }
+
+# ─ TOML ─
+[[language]]
+name = "toml"
+auto-format = true
+formatter = { command = "taplo", args = ["format", "-"] }
+
+# ─ YAML ─
+[[language]]
+name = "yaml"
+auto-format = true
+formatter = { command = "prettier", args = ["--parser", "yaml"] }
+language-servers = ["yaml-language-server"]
+
+# ─ Markdown ─
+[[language]]
+name = "markdown"
+auto-format = true
+comment-tokens = ["-", "+", "*", "1.", ">", "- [ ]"]
+formatter = { command = "prettier", args = ["--parser", "markdown"] }
+
+# ─ Bash ─
+[[language]]
+name = "bash"
+auto-format = true
+formatter = { command = "shfmt" }
+
+# ─ Python ─
+[[language]]
+name = "python"
+auto-format = true
+formatter = { command = "ruff", args = ["format", "--stdin-filename", "file.py"] }
+language-servers = ["pylsp"]
+
+# ─ Lua ─
+[[language]]
+name = "lua"
+auto-format = true
+formatter = { command = "stylua", args = ["--search-parent-directories", "--stdin-filepath", "$FILENAME", "-"] }
+
+# ─ Makefile ─
+[[language]]
+name = "make"
+auto-format = false
+# ══════════════════════════════════════════════
+# Language Servers
+# ══════════════════════════════════════════════
+
+# ─ ESLint ─
+[language-server.eslint]
+command = "vscode-eslint-language-server"
+args = ["--stdio"]
+
+[language-server.eslint.config]
+nodePath = ""
+rulesCustomizations = []
+run = "onType"
+validate = "on"
+experimental = {}
+problems = { shortenToSingleLine = false }
+
+[language-server.eslint.config.codeAction]
+disableRuleComment = { enable = true, location = "separateLine" }
+showDocumentation = { enable = false }
+
+# ─ JSON ─
+[language-server.vscode-json-language-server.config]
+json = { validate = { enable = true }, format = { enable = true } }
+provideFormatter = true
+
+# ─ CSS/SCSS/Less ─
+[language-server.vscode-css-language-server.config]
+css = { validate = { enable = true } }
+scss = { validate = { enable = true } }
+less = { validate = { enable = true } }
+provideFormatter = true
+
+# ─ YAML ─
+[language-server.yaml-language-server.config]
+yaml.schemas.kubernetes = "*.yaml"
+yaml.schemas."http://json.schemastore.org/prettierrc" = "*prettierrc.{yml,yaml}"
+
+# ─ Rust Analyzer ─
+[language-server.rust-analyzer]
+command = "rust-analyzer"
+
+[language-server.rust-analyzer.config]
+check.command = "clippy"
+cargo.features = "all"
+inlayHints.bindingModeHints.enable = true
+inlayHints.closingBraceHints.minLines = 10
+inlayHints.closureReturnTypeHints.enable = "with_block"
+inlayHints.discriminantHints.enable = "fieldless"
+inlayHints.lifetimeElisionHints.enable = "skip_trivial"
+inlayHints.typeHints.hideClosureInitialization = false
+procMacro.enable = true
+diagnostics.experimental.enable = true
+
+# ─ Clangd (C/C++) ─
+[language-server.clangd]
+command = "clangd"
+args = [
+  "--background-index",
+  "--clang-tidy",
+  "--completion-style=detailed",
+  "--header-insertion=iwyu",
+  "--function-arg-placeholders",
+  "-j=4",
+]
+
+# ─ Emmet (HTML/JSX/TSX completions) ─
+[language-server.emmet-lsp]
+command = "emmet-language-server"
+args = ["--stdio"]
+
+# ─ Tailwind CSS ─
+[language-server.tailwindcss-ls]
+command = "tailwindcss-language-server"
+args = ["--stdio"]
+
+# ══════════════════════════════════════════════
+# Language Settings
+# ══════════════════════════════════════════════
+
+# ─ C ─
+[[language]]
+name = "c"
+auto-format = true
+formatter = { command = "clang-format" }
+language-servers = ["clangd"]
+
+# ─ C++ ─
+[[language]]
+name = "cpp"
+auto-format = true
+formatter = { command = "clang-format" }
+language-servers = ["clangd"]
+
+# ─ Rust ─
+[[language]]
+name = "rust"
+auto-format = true
+language-servers = ["rust-analyzer"]
+
+[language.debugger]
+name = "lldb-dap"
+command = "lldb-dap"
+transport = "stdio"
+
+[[language.debugger.templates]]
+name = "binary"
+request = "launch"
+completion = [{ name = "binary", completion = "filename" }]
+args = { program = "{0}", runInTerminal = false }
+
+# ─ TypeScript ─
+[[language]]
+name = "typescript"
+auto-format = true
+formatter = { command = "prettier", args = ["--parser", "typescript", "--single-quote"] }
+language-servers = [
+  { name = "typescript-language-server", except-features = ["format"] },
+  { name = "eslint", except-features = ["format"] },
+]
+
+# ─ TSX ─
+[[language]]
+name = "tsx"
+auto-format = true
+formatter = { command = "prettier", args = ["--parser", "typescript", "--single-quote"] }
+language-servers = [
+  { name = "typescript-language-server", except-features = ["format"] },
+  { name = "eslint", except-features = ["format"] },
+  "emmet-lsp",
+  "tailwindcss-ls",
+]
+
+# ─ JavaScript ─
+[[language]]
+name = "javascript"
+auto-format = true
+formatter = { command = "prettier", args = ["--parser", "typescript", "--single-quote"] }
+language-servers = [
+  { name = "typescript-language-server", except-features = ["format"] },
+  { name = "eslint", except-features = ["format"] },
+]
+
+# ─ JSX ─
+[[language]]
+name = "jsx"
+auto-format = true
+formatter = { command = "prettier", args = ["--parser", "typescript", "--single-quote"] }
+language-servers = [
+  { name = "typescript-language-server", except-features = ["format"] },
+  { name = "eslint", except-features = ["format"] },
+  "emmet-lsp",
+  "tailwindcss-ls",
+]
+
+# ─ HTML ─
+[[language]]
+name = "html"
+auto-format = true
+formatter = { command = "prettier", args = ["--parser", "html"] }
+language-servers = ["vscode-html-language-server", "emmet-lsp", "tailwindcss-ls"]
+
+# ─ CSS ─
+[[language]]
+name = "css"
+auto-format = true
+formatter = { command = "prettier", args = ["--parser", "css"] }
+language-servers = ["vscode-css-language-server", "tailwindcss-ls"]
+
+# ─ SCSS ─
+[[language]]
+name = "scss"
+auto-format = true
+formatter = { command = "prettier", args = ["--parser", "scss"] }
+language-servers = ["vscode-css-language-server"]
+
+# ─ JSON ─
+[[language]]
+name = "json"
+auto-format = true
+formatter = { command = "prettier", args = ["--parser", "json"] }
+
+# ─ TOML ─
+[[language]]
+name = "toml"
+auto-format = true
+formatter = { command = "taplo", args = ["format", "-"] }
+
+# ─ YAML ─
+[[language]]
+name = "yaml"
+auto-format = true
+formatter = { command = "prettier", args = ["--parser", "yaml"] }
+language-servers = ["yaml-language-server"]
+
+# ─ Markdown ─
+[[language]]
+name = "markdown"
+auto-format = true
+comment-tokens = ["-", "+", "*", "1.", ">", "- [ ]"]
+formatter = { command = "prettier", args = ["--parser", "markdown"] }
+
+# ─ Bash ─
+[[language]]
+name = "bash"
+auto-format = true
+formatter = { command = "shfmt" }
+
+# ─ Python ─
+[[language]]
+name = "python"
+auto-format = true
+formatter = { command = "ruff", args = ["format", "--stdin-filename", "file.py"] }
+language-servers = ["pylsp"]
+
+# ─ Lua ─
+[[language]]
+name = "lua"
+auto-format = true
+formatter = { command = "stylua", args = ["--search-parent-directories", "--stdin-filepath", "$FILENAME", "-"] }
+
+# ─ Makefile ─
+[[language]]
+name = "make"
+auto-format = false
