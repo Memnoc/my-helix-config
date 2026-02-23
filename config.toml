@@ -18,6 +18,11 @@ true-color = true
 # rulers = [80, 120]
 rulers = []
 text-width = 120
+end-of-line-diagnostics = "hint"
+
+[editor.inline-diagnostics]
+cursor-line = "warning"
+other-lines = "error"
 
 [editor.cursor-shape]
 insert = "bar"
